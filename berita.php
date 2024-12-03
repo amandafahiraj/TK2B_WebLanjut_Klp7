@@ -1,6 +1,7 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Berita</h1>
 </div>
+
 <?php
 $aksi = isset($_GET['aksi']) ? $_GET['aksi'] : 'list';
 switch ($aksi) {
@@ -23,7 +24,10 @@ switch ($aksi) {
             </tr>
             <?php
             include 'koneksi.php';
-            $stmt = $db->prepare("SELECT berita.*, kategori.nama_kategori FROM berita JOIN kategori ON berita.kategori_id = kategori.id");
+            $stmt = $db->prepare("SELECT berita.*, kategori.nama_kategori 
+                                  FROM berita 
+                                  JOIN kategori ON berita.kategori_id = kategori.id 
+                                  ORDER BY berita.date_created DESC");
             $stmt->execute();
             $no = 1;
             while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -36,7 +40,7 @@ switch ($aksi) {
                     <td><?= htmlspecialchars($data['date_created']) ?></td>
                     <td>
                         <a href="index.php?p=berita&aksi=edit&id=<?= $data['id'] ?>" class="btn btn-success">Edit</a>
-                        <a href="proses_berita.php?proses=delete&id=<?= $data['id'] ?>&img=<?= $data['file_upload'] ?>" onclick="return confirm('Apa anda yakin menghapus data?')" class="btn btn-danger">Hapus</a>
+                        <a href="proses_berita.php?proses=delete&id=<?= $data['id'] ?>&img=<?= $data['file_upload'] ?>" onclick="return confirm('Apa Anda yakin menghapus data?')" class="btn btn-danger">Hapus</a>
                     </td>
                 </tr>
             <?php
@@ -57,36 +61,36 @@ switch ($aksi) {
         <div class="row">
             <div class="col-6">
                 <div class="row mb-3">
-                    <label for="nama_berita" class="col-sm-2 col-form-label">Judul</label>
+                    <label for="judul" class="col-sm-2 col-form-label">Judul</label>
                     <div class="col-sm-10">
-                        <input type="text" name="judul" class="form-control">
+                        <input type="text" name="judul" class="form-control" required>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label for="nama_berita" class="col-sm-2 col-form-label">Kategori</label>
+                    <label for="kategori_id" class="col-sm-2 col-form-label">Kategori</label>
                     <div class="col-sm-10">
-                        <select name="kategori_id" class="form-select">
+                        <select name="kategori_id" class="form-select" required>
                             <option value="">--Pilih Kategori--</option>
                             <?php
-                            $stmt = $db->prepare("SELECT * FROM kategori");
+                            $stmt = $db->prepare("SELECT * FROM kategori ORDER BY nama_kategori ASC");
                             $stmt->execute();
                             while ($data_kategori = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                echo "<option value=" . $data_kategori['id'] . ">" . htmlspecialchars($data_kategori['nama_kategori']) . "</option>";
+                                echo "<option value='" . $data_kategori['id'] . "'>" . htmlspecialchars($data_kategori['nama_kategori']) . "</option>";
                             }
                             ?>
                         </select>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label for="nama_berita" class="col-sm-2 col-form-label">File Upload</label>
+                    <label for="fileToUpload" class="col-sm-2 col-form-label">File Upload</label>
                     <div class="col-sm-10">
-                        <input type="file" class="form-control" name="fileToUpload" id="file-upload">
+                        <input type="file" class="form-control" name="fileToUpload" id="file-upload" required>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label for="keterangan" class="col-sm-2 col-form-label">Isi Berita</label>
+                    <label for="isi_berita" class="col-sm-2 col-form-label">Isi Berita</label>
                     <div class="col-sm-10">
-                        <textarea name="isi_berita" class="form-control" rows="10"></textarea>
+                        <textarea name="isi_berita" class="form-control" rows="10" required></textarea>
                     </div>
                 </div>
                 <button type="submit" name="Proses" value="Proses" class="btn btn-primary">Proses</button>
@@ -110,15 +114,15 @@ switch ($aksi) {
     <form action="proses_berita.php?proses=update" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?= $data_berita['id'] ?>">
         <div class="row mb-3">
-            <label for="nama_berita" class="col-sm-2 col-form-label">Judul</label>
+            <label for="judul" class="col-sm-2 col-form-label">Judul</label>
             <div class="col-sm-10">
-                <input type="text" name="judul" class="form-control" value="<?= htmlspecialchars($data_berita['judul']) ?>">
+                <input type="text" name="judul" class="form-control" value="<?= htmlspecialchars($data_berita['judul']) ?>" required>
             </div>
         </div>
         <div class="row mb-3">
             <label for="kategori_id" class="col-sm-2 col-form-label">Kategori</label>
             <div class="col-sm-10">
-                <select name="kategori_id" class="form-select">
+                <select name="kategori_id" class="form-select" required>
                     <?php
                     $stmt = $db->prepare("SELECT * FROM kategori");
                     $stmt->execute();
@@ -139,7 +143,7 @@ switch ($aksi) {
         <div class="row mb-3">
             <label for="isi_berita" class="col-sm-2 col-form-label">Isi Berita</label>
             <div class="col-sm-10">
-                <textarea name="isi_berita" class="form-control" rows="10"><?= htmlspecialchars($data_berita['isi_berita']) ?></textarea>
+                <textarea name="isi_berita" class="form-control" rows="10" required><?= htmlspecialchars($data_berita['isi_berita']) ?></textarea>
             </div>
         </div>
         <button type="submit" name="Proses" value="Proses" class="btn btn-primary">Update</button>
@@ -150,19 +154,3 @@ switch ($aksi) {
         break;
 }
 ?>
-
-<script>
-    const input = document.getElementById('file-upload');
-    const previewPhoto = () => {
-        const file = input.files;
-        if (file) {
-            const fileReader = new FileReader();
-            const preview = document.getElementById('file-preview');
-            fileReader.onload = function(event) {
-                preview.setAttribute('src', event.target.result);
-            }
-            fileReader.readAsDataURL(file[0]);
-        }
-    }
-    input.addEventListener("change", previewPhoto);
-</script>
