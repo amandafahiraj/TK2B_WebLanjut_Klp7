@@ -5,9 +5,10 @@ $nama_file=rand(). '-'.basename($_FILES["fileToUpload"]["name"]);
 $target_file = $target_dir . $nama_file;
 $uploadOk = 1;
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+include 'koneksi.php';
 
 if($_GET['proses']=='insert'){
-    include 'koneksi.php';
+   
 
 
     // Check if image file is a actual image or fake image
@@ -54,7 +55,7 @@ if($_GET['proses']=='insert'){
     }
 
 
-    $sql=mysqli_query($db, "INSERT INTO berita (user_id, kategori_id, judul, file_upload, isi_berita) VALUES ('$_SESSION[user_id])','$_POST[kategori_id]','$_POST[judul]','$nama_file','$_POST[isi_berita]')");
+    $sql=mysqli_query($db, "INSERT INTO berita (user_id, kategori_id, judul, file_upload, isi_berita) VALUES ('$_SESSION[user_id]','$_POST[kategori_id]','$_POST[judul]','$nama_file','$_POST[isi_berita]')");
 
     if ($sql){
         echo "<script>window.location='index.php?p=berita'</script>";
@@ -64,48 +65,53 @@ if($_GET['proses']=='insert'){
 
 if ($_GET['proses'] == 'update') {
     if (isset($_POST['Proses'])) {
-        // Mengambil data dari form
-        $id = $_POST['id']; // Pastikan ID diambil dari form
-        $nama_berita = $_POST['nama_berita'];
-        $user_id = $_POST['user_id'];
 
-        // Query untuk update data berdasarkan ID
-        $sql = mysqli_query($db, "UPDATE kategori SET 
-            nama_berita = '$nama_berita',
-            user_id = '$user_id'
-            WHERE id = '$id'");
+        $id = $_POST['id']; // ID berita yang akan diupdate
+        $judul = $_POST['judul'];
+        $kategori_id = $_POST['kategori_id'];
+        $isi_berita = $_POST['isi_berita'];
+
+        // File upload logic (jika ada file yang diupload)
+        if ($_FILES['fileToUpload']['name'] != "") {
+            $target_dir = "uploads/";
+            $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+            move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file);
+
+            $sql = mysqli_query($db, "UPDATE berita SET
+                user_id = '$user_id', 
+                judul = '$judul', 
+                kategori_id = '$kategori_id', 
+                isi_berita = '$isi_berita', 
+                file_upload = '$target_file'
+                WHERE id = '$id'");
+        } else {
+            // Jika tidak ada file yang diupload, update tanpa mengubah file
+            $sql = mysqli_query($db, "UPDATE berita SET 
+                user_id = '$user_id', 
+                judul = '$judul', 
+                kategori_id = '$kategori_id', 
+                isi_berita = '$isi_berita'
+                WHERE id = '$id'");
+        }
 
         // Redirect jika berhasil update
         if ($sql) {
-            echo "<script>window.location='index.php?p=kategori'</script>";
+            echo "<script>window.location='index.php?p=berita'</script>";
         } else {
             echo "Gagal memperbarui data!";
         }
     }
 }
-if ($_GET['proses']=='delete') {
-    include("koneksi.php");
-    unlink($target_dir.$_GET['img']);
-    $hapus = mysqli_query($db, "DELETE FROM berita WHERE id='$_GET[id]'");
-    if ($hapus) {
-        header("Location:index.php?p=berita");
+
+if ($_GET['proses'] == 'delete') {
+        include("koneksi.php");
+        unlink($target_dir.$_GET['img']);
+
+        $hapus= mysqli_query($db, "DELETE FROM berita WHERE id='$_GET[id]'");
+
+        if ($hapus) {
+            header("Location:index.php?p=berita");
+        } else {
+            echo "Gagal menghapus data!";
+        }
     }
-}
-// if ($_GET['proses'] == 'delete') {
-//     if (isset($_GET['id'])) {
-//         $id = $_GET['id'];
-//         include("koneksi.php");
-
-//         // Query untuk menghapus data berdasarkan ID
-//         $query = "DELETE FROM kategori WHERE id='$id'";
-//         $sql = mysqli_query($db, $query);
-
-//         // Redirect jika berhasil hapus data
-//         if ($sql) {
-//             header("Location:index.php?p=kategori");
-//         } else {
-//             echo "Gagal menghapus data!";
-//         }
-//     } 
-// }
-?>
