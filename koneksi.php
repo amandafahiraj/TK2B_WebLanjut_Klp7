@@ -6,7 +6,7 @@ $nama_database = "db_pdo";
 
 try {
     // Membuat koneksi ke database menggunakan PDO
-    $db = new PDO("mysql:host=$server;dbname=$db_pdo;charset=utf8", $user, $password);
+    $db = new PDO("mysql:host=$server;dbname=$nama_database;charset=utf8", $user, $password);
 
     // Mengatur mode error agar PDO melempar exception jika terjadi kesalahan
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
